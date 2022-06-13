@@ -83,7 +83,7 @@ class Circle:
         for j in range(-size, size):                            #
             #continue
             x1 = -0 * xSize                                      #
-            if random.randint(0,100)<100:
+            if random.randint(0,100)<70:
                 idx = self.simulator_.add_agent(Vector2(x1,j*(radius*2))) #
                 self.goals_.append(Vector2(x1, j*(radius*2)))        #
                 self.simulator_.agents_[idx].static_= True
@@ -137,9 +137,9 @@ class Circle:
         c =0
         for j in range(-size, size):                             #
             c+=1
-            if c>1:
+            if c>10000:
                 continue
-            if j>0:
+            if j%10<5:
                 continue
             x1 = -2 * xSize                                      #
             x2 = 2 * xSize                                       #
@@ -370,16 +370,16 @@ class Circle:
                 randomGoal = False
             elif (nearGoal > 2*radius) and (abs(velocity) <=0.1):
                 randomGoal = True
-            elif  (nearGoal > 2*radius) and (agent1.check_preposition_ and movepos<0.5): #
+            elif  (nearGoal > 2*radius) and (agent1.check_preposition_ and movepos<1): #
                 randomGoal = True                                                       #
                 #exit()
             else:
                 randomGoal = False
 
-            randomGoal= False
+            #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                self.simulator_.agents_[i].randomGoalTick_ =140
+                self.simulator_.agents_[i].randomGoalTick_ =240
                 # 选一个偏移方向. 45-135  225- 315
                 #
 
@@ -454,9 +454,10 @@ class Circle:
             goal = self.goals_[i]
             agent = self.simulator_.agents_[i]
 
-            if self.count_ %825 ==0:
-                agent.pre_position_ = agent.position_
+            if self.count_ %400 ==0:
                 agent.check_preposition_ = True
+            elif self.count_ %425 ==200:
+                agent.pre_position_ = agent.position_
             else:
                 agent.check_preposition_ = False
 
