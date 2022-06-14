@@ -55,7 +55,7 @@ class BlockFinder(astar.AStar):
         x, y = node[0], node[1]
         ret = []
         #for i, dd in  enumerate([(-1,1), (-1,0), (-1,-1), (0,1), (0,-1),(1,1), (1,0), (1,-1)]):
-        for i, dd in  enumerate([ (-1,0),  (0,1), (0,-1), (1,0)]):
+        for i, dd in enumerate([ (-1,0),  (0,1), (0,-1), (1,0)]):
             nearbyKey = (x+dd[0], y+dd[1])
             if nearbyKey in self.maze_:
                 nearbyBody = self.maze_[nearbyKey]
@@ -451,10 +451,11 @@ class Circle:
             randomGoal = False
             if agent1.static_:
                 randomGoal = False
-            elif (nearGoal > 2*radius) and (abs(velocity) <=0.1):
+            elif (nearGoal > 2*radius) and (abs(velocity) <=0.3):
                 randomGoal = True
             elif  (nearGoal > 2*radius) and (agent1.check_preposition_ and movepos<2): #
-                randomGoal = True                                                       #
+                randomGoal = True
+                print(i, "distance random")
                 #exit()
             else:
                 randomGoal = False
@@ -611,7 +612,7 @@ class Circle:
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
             agent = self.simulator_.agents_[i]
-            xxy = 200
+            xxy = 150
 
 
             if self.count_ %xxy ==0:
