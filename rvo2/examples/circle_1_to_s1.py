@@ -223,8 +223,13 @@ class Circle:
             x2 = 2 * xSize                                       #
 
             #x = 5
-            self.simulator_.add_agent(self.keyToPos((x1,x+j)) )  #
-            self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
+            #if random.randint(0,1) == 0:
+            if j %1 == 0:
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)) )  #
+                self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
+            else:
+                self.simulator_.add_agent(self.keyToPos((-x1,x+j)) )
+                self.goals_.append(self.keyToPos( (-x2, -(x+j)) ))
             #break
 
 
