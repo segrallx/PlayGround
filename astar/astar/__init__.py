@@ -84,13 +84,13 @@ class AStar:
         openSet = []
         heappush(openSet, startNode)
         i =0
-        nn = 10
+        nn = 20
 
         while openSet:
             i+=1
             current = heappop(openSet)
             if self.is_goal_reached(current.data, goal) or i>nn:
-                if i>nn and ( not self.is_goal_reached(current.data, goal)):
+                if i>nn and (not self.is_goal_reached(current.data, goal)):
                     print("half astar")
                 return self.reconstruct_path(current, reversePath)
             current.out_openset = True

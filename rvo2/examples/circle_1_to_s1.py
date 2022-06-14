@@ -154,7 +154,7 @@ class Circle:
         for j in range(-size, size):                            #
             #continue
             x1 = -0                                       #
-            if random.randint(0,100)<70:
+            if random.randint(0,100)<80:
                 idx = self.simulator_.add_agent( self.keyToPos((x1, j)))
                 self.goals_.append(self.keyToPos((x1, j)))
                 self.simulator_.agents_[idx].static_= True
@@ -546,7 +546,7 @@ class Circle:
                 if goalPlan ==2:
                     print("try random")
                     randomTha1 = 0
-                    span = 45
+                    span = 30
                     rspan = 90
                     if agent1.keepDirTick_> 0:
                         agent1.keepDirTick_-=1
