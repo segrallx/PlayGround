@@ -22,6 +22,7 @@ class Agent:
         self.pref_velocity_ = Vector2()
         self.velocity_ = Vector2()
         self.randomGoal_ = Vector2()
+        self.randomGoalList_ = []
         self.randomGoalTick_ = 0
         self.id_ = 0
         self.keepDir_ = 0

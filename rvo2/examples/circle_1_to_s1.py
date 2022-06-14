@@ -9,6 +9,8 @@ import rvo.math as rvo_math
 from rvo.vector import Vector2
 from rvo.simulator import Simulator
 
+import astar
+
 RVO_RENDER = True
 
 
@@ -28,24 +30,84 @@ class CircleBlock:
         #    print(v.x_, v.y_)
         return ret
 
+class Block():
+    def __init__(self, position):
+        self.position_ = position
+        self.static_ = False
+
+
+class BlockFinder(astar.AStar):
+    def __init__(self, maze):
+        self.maze_ = maze
+
+    # 两个格子之间的距离
+    def heuristic_cost_estimate(self, current, goal):
+        cX, cY = current[0], current[1]
+        gX, gY = goal[0], goal[1]
+        return abs(Vector2(gX-cX, gY-cY))
+
+    def distance_between(self, n1, n2):
+        cX, cY = n1[0], n1[1]
+        gX, gY = n2[0], n2[1]
+        return abs(Vector2(gX-cX, gY-cY))
+
+    def neighbors(self, node):
+        x, y = node[0], node[1]
+        ret = []
+        for i, dd in  enumerate([(-1,1), (-1,0), (-1,-1), (0,1), (0,-1),(1,1), (1,0), (1,-1)]):
+            nearbyKey = (x+dd[0], y+dd[1])
+            if nearbyKey in self.maze_:
+                nearbyBody = self.maze_[nearbyKey]
+                if not nearbyBody.static_:
+                    ret.append(nearbyKey)
+        return ret
 
 
 class Circle:
 
     def __init__(self):
         # Store the goals of the agents.
+        self.blockFinder_ = BlockFinder({})
         self.goals_ = []
         self.simulator_ = Simulator()
         self.obstacles_ = [] # Vector2
         self.shows_ = [] # Vector2
         self.count_ = 0
+        self.radius_ = 10
+        self.infradius_ = 10
+        self.gridSize_ = self.radius_*2
+        self.width_ = int(225/self.gridSize_)
+        self.height_ = int(225/self.gridSize_)
+
+    def make_maze(self):
+        print("make_maze")
+        maze = {}
+        for i in range(-self.width_,self.width_):
+            for j in range(-self.height_,self.height_):
+                pos = (i,j)
+                maze[pos] = Block(pos)
+
+        for i in range(self.simulator_.num_agents):
+            agent1 = self.simulator_.agents_[i]
+            print(agent1.static_)
+            if agent1.static_:
+                x = int(agent1.position_.x/self.gridSize_)
+                y = int(agent1.position_.y/self.gridSize_)
+                posKey = (x,y)
+                if posKey in maze:
+                    #print(posKey, "is block")
+                    posBody = maze[posKey]
+                    posBody.static_ = True
+        #exit()
+        self.blockFinder_ = BlockFinder(maze)
+
 
     # 随机点，有随机的停止点.
     def setup_scenario(self):
         # Specify the global time step of the simulation.
         self.simulator_.set_time_step(0.5)
-        radius = 10
         # Specify the default parameters for agents that are subsequently added.
+        radius = self.infradius_
         self.simulator_.set_agent_defaults(2*radius, 6, 10, 10.0, radius, radius, Vector2(18.0, 8.0))
         width = 225
 
@@ -79,16 +141,18 @@ class Circle:
             self.simulator_.agents_[idx].static_= True
         '''
 
+        radius = self.radius_
+
         # 网格阻挡
         for j in range(-size, size):                            #
             #continue
             x1 = -0 * xSize                                      #
-            if random.randint(0,100)<70:
-                idx = self.simulator_.add_agent(Vector2(x1,j*(radius*2))) #
-                self.goals_.append(Vector2(x1, j*(radius*2)))        #
+            if random.randint(0,100)<50:
+                idx = self.simulator_.add_agent(Vector2(x1,j*(radius*2)))
+                self.goals_.append(Vector2(x1, j*(radius*2)))
                 self.simulator_.agents_[idx].static_= True
 
-            continue
+            #continue
             #随机在起左右边生成阻挡.                                                #
             xx = random.randint(0,7)                                                # #
             yy = random.randint(0,7)
@@ -133,16 +197,19 @@ class Circle:
 
 
         #生成移动点.
-        x = random.randint(-size, size)
+
+        x =0
         c =0
-        for j in range(-size, size):                             #
+
+        for j in range( -size, size):                             #
             c+=1
-            if c>10000:
+            if c>4:
                 continue
-            if j%10<5:
+            if j==0:
                 continue
             x1 = -2 * xSize                                      #
             x2 = 2 * xSize                                       #
+            x = random.randint(-size, size)
             self.simulator_.add_agent(Vector2(x1,(j+x) *(radius*2)))  #
             self.goals_.append(Vector2(x2, -(j+x)*(radius*2)))       #
             #break
@@ -191,14 +258,14 @@ class Circle:
         # self.shows_.append(Vector2(100,50))               #
         # self.shows_.append(Vector2(-50,-50))              #
         #                                                   #
-        # self.shows_.append(Vector2(-225,-225))            #
-        # self.shows_.append(Vector2(225,225))              #
+        self.shows_.append(Vector2(-225,-225))            #
+        self.shows_.append(Vector2(225,225))              #
         #                                                   #
         # self.simulator_.add_agent(Vector2(-50,0))         #
         # self.goals_.append(Vector2(100,50))               #
         #####################################################
 
-
+        self.make_maze()
     def setup_scenario1(self):
         # Specify the global time step of the simulation.
         self.simulator_.set_time_step(0.5)
@@ -362,8 +429,7 @@ class Circle:
             radius = self.simulator_.default_agent_.radius_
             movepos = abs(position - pre_position)
             print(i, "velocity", velocity, "abs velocity", abs(velocity),
-                  "movedis", movepos, "position", position)
-
+                  "movedis", movepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static)
 
             randomGoal = False
             if agent1.static_:
@@ -379,41 +445,107 @@ class Circle:
             #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                self.simulator_.agents_[i].randomGoalTick_ =240
+                agent1.randomGoalTick_ =440
                 # 选一个偏移方向. 45-135  225- 315
                 #
+                goalPlan = 1
+                # A*找点.
+                if goalPlan==1:
+                    curX = int(position.x / self.gridSize_)
+                    curY = int(position.y / self.gridSize_)
+                    start = (curX,curY)
+                    lls = [(0,0), (0,1),  (0,-1), (-1,0),(1,0), (-1,1), (-1,-1), (1,1), (1,-1)]
+                    random.shuffle(lls)
 
-                randomTha1 = 0
-                span = 45
-                rspan = 90
-                if agent1.keepDirTick_> 0:
-                    agent1.keepDirTick_-=1
-                    if agent1.keepDir_==0:
-                        randomTha1 = random.randint(360-span-rspan,360-span)
+                    goalPlan=2
+
+                    #distance = 1000000
+                    findKey = start
+                    findKeyX = False
+
+
+                    if start in self.blockFinder_.maze_:            #
+                        nearbyBody = self.blockFinder_.maze_[start] #
+                        # 当前点必须不是阻挡.                       #
+                        if not nearbyBody.static_:                  #
+                            findKeyX = True
+
+
+
+
+
+                    ###########################################################
+                    # for i, dd in  enumerate(lls):                           #
+                    #     nearbyKey = (curX+dd[0], curY+dd[1])                #
+                    #     if nearbyKey in self.blockFinder_.maze_:            #
+                    #         nearbyBody = self.blockFinder_.maze_[nearbyKey] #
+                    #         if not nearbyBody.static_:                      #
+                    #             pos = Vector2( nearbyKey[0],nearbyKey[1])   #
+                    #             dis = abs(position - pos)                   #
+                    #             if dis < distance:                          #
+                    #                 findKey = nearbyKey                     #
+                    #                 findKeyX = True                         #
+                    ###########################################################
+
+                    if findKeyX:
+                        goalX = int(goal.x/self.gridSize_)
+                        goalY = int(goal.y/self.gridSize_)
+                        ret = self.blockFinder_.astar(findKey, (goalX,goalY))
+                        print("astar find l1",  start , (goalX,goalY))
+                        if ret !=  None:
+                            ll = [station for station in ret]
+                            goldTuple = ll[0]
+                            agent1.randomGoal_ = Vector2(goldTuple[0]*self.gridSize_, goldTuple[1]*self.gridSize_ )
+                            agent1.randomGoalList_ =ll[1:]
+                            print("astar find",  goldTuple,agent1.randomGoal_ , ll)
+                            goalPlan=1
+                            break
+                                    #exit()
+                        else:
+                            print("start is static", start)
                     else:
-                        randomTha1 = random.randint(span,span+rspan)
-                else:
-                    # 这里需要强制转向
-                    agent1.keepDirTick_=5
-                    #if goal.y > position.y:
-                    if random.randint(0,1) ==0:
-                        print("goal up")
-                        randomTha1 = random.randint(360-span-rspan,360-span)
-                        agent1.keepDir_ = 0
+                        print("start not in maze", start)
+
+                    #if goalPlan==2:
+                        #goalPlan=1
+                        #agent1.randomGoalTick_ =0
+
+
+
+                # 随机找点.
+                if goalPlan ==2:
+                    print("try random")
+                    randomTha1 = 0
+                    span = 45
+                    rspan = 90
+                    if agent1.keepDirTick_> 0:
+                        agent1.keepDirTick_-=1
+                        if agent1.keepDir_==0:
+                            randomTha1 = random.randint(360-span-rspan,360-span)
+                        else:
+                            randomTha1 = random.randint(span,span+rspan)
                     else:
-                        randomTha1 = random.randint(span,span+rspan)
-                        agent1.keepDir_ = 1
-                        print("goal down")
+                        # 这里需要强制转向
+                        agent1.keepDirTick_=5
+                        #if goal.y > position.y:
+                        if random.randint(0,1) ==0:
+                            print("goal up")
+                            randomTha1 = random.randint(360-span-rspan,360-span)
+                            agent1.keepDir_ = 0
+                        else:
+                            randomTha1 = random.randint(span,span+rspan)
+                            agent1.keepDir_ = 1
+                            print("goal down")
 
 
-                newGoal = self.changeAngle(position, goal, randomTha1)
-                print(i, "random reset randomTha", randomTha1, "pos", position, "goal", goal, "newGoal", newGoal)
-                self.simulator_.agents_[i].randomGoal_ = newGoal
-                ##############################################################################
-                # self.simulator_.agents_[i].randomGoal_ = Vector2(random.randint(-100,100), #
-                #                                                  random.randint(-100,100)) #
-                ##############################################################################
-                # 根据目标点位置，随机偏移一定的角度。
+                    newGoal = self.changeAngle(position, goal, randomTha1)
+                    print(i, "random reset randomTha", randomTha1, "pos", position, "goal", goal, "newGoal", newGoal)
+                    agent1.randomGoal_ = newGoal
+                    ##############################################################################
+                    # agent1.randomGoal_ = Vector2(random.randint(-100,100), #
+                    #                                                  random.randint(-100,100)) #
+                    ##############################################################################
+                    # 根据目标点位置，随机偏移一定的角度。
 
             if agent1.randomGoalTick_>0:
                 circle = viewer.draw_circle(radius=self.simulator_.default_agent_.radius_, color=color)
@@ -453,10 +585,11 @@ class Circle:
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
             agent = self.simulator_.agents_[i]
+            xxy = 200
 
-            if self.count_ %400 ==0:
+            if self.count_ %xxy ==0:
                 agent.check_preposition_ = True
-            elif self.count_ %425 ==200:
+            elif self.count_ %xxy ==xxy/2:
                 agent.pre_position_ = agent.position_
             else:
                 agent.check_preposition_ = False
@@ -478,9 +611,23 @@ class Circle:
         Check if all agents have reached their goals.
         """
         for i in range(self.simulator_.num_agents):
+            agent = self.simulator_.agents_[i]
+            if rvo_math.abs_sq(agent.position_ - agent.randomGoal_ ) < agent.radius_ * agent.radius_:
+                if len(agent.randomGoalList_) >0:
+                    xx = agent.randomGoalList_[0]
+                    print("random pop", i, "goal: ", xx)
+                    agent.randomGoal_ = Vector2(xx[0]*self.gridSize_,xx[1]*self.gridSize_)
+                    agent.randomGoalList_=agent.randomGoalList_[1:]
+                else:
+                    agent.randomGoalList_=[]
+                    agent.randomGoal_= Vector2()
+                    agent.randomGoalTick_= 0
+
             if rvo_math.abs_sq(self.simulator_.agents_[i].position_ - self.goals_[i]) > self.simulator_.agents_[i].radius_ * self.simulator_.agents_[i].radius_:
                 print(i, "not reach")
                 return False
+
+
 
         return True
 
