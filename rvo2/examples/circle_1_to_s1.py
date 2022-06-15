@@ -55,7 +55,9 @@ class BlockFinder(astar.AStar):
         x, y = node[0], node[1]
         ret = []
         #for i, dd in  enumerate([(-1,1), (-1,0), (-1,-1), (0,1), (0,-1),(1,1), (1,0), (1,-1)]):
-        for i, dd in enumerate([ (-1,0),  (0,1), (0,-1), (1,0)]):
+        nex = [ (-1,0),  (0,1), (0,-1), (1,0)]
+        random.shuffle(nex)
+        for i, dd in enumerate(nex):
             nearbyKey = (x+dd[0], y+dd[1])
             if nearbyKey in self.maze_:
                 nearbyBody = self.maze_[nearbyKey]
