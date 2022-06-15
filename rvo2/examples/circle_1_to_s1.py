@@ -435,7 +435,11 @@ class Circle:
         if not RVO_RENDER:
             return
 
-        goalPlan = random.randint(1,2)
+        goalPlan = random.randint(1,200)
+        if goalPlan<100:
+            goalPlan = 1
+        else:
+            goalPlan = 2
         # Render the current position of all the agents.
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
