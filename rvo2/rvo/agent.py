@@ -31,6 +31,7 @@ class Agent:
         self.max_speed_ = 0.0
         self.neighbor_dist_ = 0.0
         self.radius_ = 0.0
+        self.radius_max_ = 0.0
         self.time_horizon_ = 0.0
         self.time_horizon_obst_ = 0.0
         self.new_velocity_ = Vector2()

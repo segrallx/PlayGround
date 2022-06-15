@@ -76,9 +76,9 @@ class Circle:
         self.obstacles_ = [] # Vector2
         self.shows_ = [] # Vector2
         self.count_ = 0
-        self.radius_ = 10
         self.infradius_ = 10
-        self.gridSize_ = self.radius_*2
+        self.infradius_max_ = 13
+        self.gridSize_ = 20
         self.width_ = int(225/self.gridSize_)
         self.height_ = int(225/self.gridSize_)
 
@@ -107,6 +107,22 @@ class Circle:
                     #print(posKey, "is block")
                     posBody = maze[posKey]
                     posBody.static_ = True
+                #continue
+                x, y = posKey[0], posKey[1]
+                if agent1.radius_*2 > self.gridSize_:
+                    for i, dd in  enumerate([(-1,1), (-1,0), (-1,-1), (0,1), (0,-1),(1,1), (1,0), (1,-1)]):
+                        nearbyKey = (x+dd[0], y+dd[1])
+                        print(nearbyKey , "set static")
+                        if nearbyKey in maze:
+                            posBody = maze[nearbyKey]
+                            posBody.static_ = True
+                        else:
+                            bl = Block(nearbyKey)
+                            bl.static_ = True
+                            maze[nearbyKey] = bl
+
+
+
         #exit()
         self.blockFinder_ = BlockFinder(maze)
 
@@ -117,9 +133,9 @@ class Circle:
         self.simulator_.set_time_step(0.5)
         # Specify the default parameters for agents that are subsequently added.
         radius = self.infradius_
-        self.simulator_.set_agent_defaults(2*radius, 6, 10, 10.0, radius, radius, Vector2(18.0, 8.0))
+        radius_max = self.infradius_max_
+        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 1, Vector2(18.0, 8.0), radius_max)
         width = 225
-
 
         size = int(width/(radius*4))
         #xSize = width/3
@@ -150,13 +166,13 @@ class Circle:
             self.simulator_.agents_[idx].static_= True
         '''
 
-        radius = self.radius_
-
         # 网格阻挡
         for j in range(-size, size):                            #
             #continue
             x1 = -0                                       #
-            if random.randint(0,100)<70:
+            if random.randint(0,100)<60:
+                #if j%2==0:
+                #    continue
                 idx = self.simulator_.add_agent( self.keyToPos((x1, j)))
                 self.goals_.append(self.keyToPos((x1, j)))
                 self.simulator_.agents_[idx].static_= True
@@ -165,6 +181,17 @@ class Circle:
             #随机在起左右边生成阻挡.                                                #
             xx = random.randint(0,7)                                                # #
             yy = random.randint(0,7)
+
+            ################
+            # if xx ==2:   #
+            #     yy = 3   #
+            # elif xx ==3: #
+            #     yy=2     #
+            # else:        #
+            #     fwefwf=0 #
+            ################
+            #xx = -1
+            #yy = 3
             if xx==0:                                                               # #
                 idx = self.simulator_.add_agent( self.keyToPos((x1-1, j)) )  # #
                 self.goals_.append(self.keyToPos((x1-1, j)))        #     # #
@@ -184,7 +211,7 @@ class Circle:
             else:                                                                   # #
                 fxfwef=0                                                                 # #
 
-
+            #continue
             if yy==0:                                                               # #
                 idx = self.simulator_.add_agent( self.keyToPos((x1-3, j)) )  # #
                 self.goals_.append(self.keyToPos((x1-3, j)))        #     # #
@@ -208,7 +235,6 @@ class Circle:
 
 
         #生成移动点.
-
         x =0
         c =0
         x = random.randint(-size, size)
@@ -216,200 +242,38 @@ class Circle:
 
         for j in range( -int(size), int(size)):                             #
             c+=1
-            if c>10:
+            if c>14:
                 continue
-            if j==0:
+            if j%2==0:
                 continue
 
             x1 = -2 * xSize                                      #
             x2 = 2 * xSize                                       #
 
+
+
+
             #x = 5
-            if random.randint(0,0) == 0:
-            #if j %1 == 0:
-                self.simulator_.add_agent(self.keyToPos((x1,x+j)) )  #
+            if random.randint(0,2) == 3:
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
             else:
-                self.simulator_.add_agent(self.keyToPos((-x1,x+j)) )
-                self.goals_.append(self.keyToPos( (-x2, -(x+j)) ))
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)),10)  #
+                self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
+            #if j %2 == 0:
+
+            #################################################################
+            #     self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #     #
+            #     self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       # #
+            # else:                                                         #
+            #     self.simulator_.add_agent(self.keyToPos((-x1,x+j)) ,10)   #
+            #     self.goals_.append(self.keyToPos( (-x2, -(x+j)) ))        #
+            #################################################################
+
             #break
 
-
-        ###############################################################
-        # for j in range(-size, size):                            #   #
-        #     if j%2==1:                                              #
-        #         continue                                            #
-        #     x1 = 2 * xSize                                      #   #
-        #     x2 = -2 * xSize                                       # #
-        #     self.simulator_.add_agent(Vector2(x1,j*(radius*2))) #   #
-        #     self.goals_.append(Vector2(x2, -j*(radius*2)))        # #
-        ###############################################################
-
-
-
-        #####################################################
-        # idx = 0                                           #
-        # # 这里全是阻挡.                                   #
-        # self.simulator_.add_agent(Vector2(0,0))           #
-        # self.goals_.append(Vector2(0,0))                  #
-        # self.simulator_.agents_[idx].static_ = True       #
-        #                                                   #
-        # self.simulator_.add_agent(Vector2(0,radius*2))  # #
-        # self.goals_.append(Vector2(0,radius*2))         # #
-        # idx +=1                                         # #
-        # self.simulator_.agents_[idx].static_ = True #     #
-        #                                                 # #
-        # self.simulator_.add_agent(Vector2(0,-radius*2)) # #
-        # self.goals_.append(Vector2(0,-radius*2))        # #
-        # idx +=1                                         # #
-        # self.simulator_.agents_[idx].static_ = True #     #
-        #                                                   #
-        # self.simulator_.add_agent(Vector2(0,radius*4))  # #
-        # self.goals_.append(Vector2(0,radius*4))        #  #
-        # idx +=1                                         # #
-        # self.simulator_.agents_[idx].static_ = True #     #
-        #                                                 # #
-        # self.simulator_.add_agent(Vector2(0,-radius*4)) # #
-        # self.goals_.append(Vector2(0,-radius*4))        # #
-        # idx +=1                                         # #
-        # self.simulator_.agents_[idx].static_ = True #     #
-        #                                                   #
-        # # 只是用来展示的目标点，没有碰撞                  #
-        # self.shows_.append(Vector2(100,50))               #
-        # self.shows_.append(Vector2(-50,-50))              #
-        #                                                   #
-        #self.shows_.append(Vector2(-225,-225))            #
-        #self.shows_.append(Vector2(225,225))              #
         self.shows_.append(Vector2(-20,20))              #
-
-        #                                                   #
-        # self.simulator_.add_agent(Vector2(-50,0))         #
-        # self.goals_.append(Vector2(100,50))               #
-        #####################################################
-
         self.make_maze()
-    def setup_scenario1(self):
-        # Specify the global time step of the simulation.
-        self.simulator_.set_time_step(0.5)
-
-        radius = 13
-
-        # Specify the default parameters for agents that are subsequently added.
-        self.simulator_.set_agent_defaults(2*radius, 6, 10, 10.0, radius, radius, Vector2(18.0, 8.0))
-
-        # Add agents, specifying their start position, and store their goals on the opposite side of the environment.
-        ##############################################################################################
-        # for i in range(250):                                                                       #
-        #     self.simulator_.add_agent(200.0 *                                                      #
-        #         Vector2(math.cos(i * 2.0 * math.pi / 250.0), math.sin(i * 2.0 * math.pi / 250.0))) #
-        #     self.goals_.append(-self.simulator_.agents_[i].position_)                              #
-        ##############################################################################################
-
-        ss = True
-        obs = False
-        idx = 0
-
-        if obs:
-            ####################################################################
-            # block1 = CircleBlock(Vector2(0,0),radius).to_polygon()           #
-            # self.simulator_.add_obstacle(block1)                             #
-            # self.obstacles_.append(block1)                                   #
-            #                                                                  #
-            # block1 = CircleBlock(Vector2(0,radius*2),radius).to_polygon()  # #
-            # self.simulator_.add_obstacle(block1)                           # #
-            # self.obstacles_.append(block1)                                 # #
-            #                                                                # #
-            # block1 = CircleBlock(Vector2(0,-radius*2),radius).to_polygon() # #
-            # self.simulator_.add_obstacle(block1)                           # #
-            # self.obstacles_.append(block1)                                 # #
-            #                                                                  #
-            # block1 = CircleBlock(Vector2(0,radius*4),radius).to_polygon()    #
-            # self.simulator_.add_obstacle(block1)                             #
-            # self.obstacles_.append(block1)                                   #
-            #                                                                  #
-            # block1 = CircleBlock(Vector2(0,-radius*4),radius).to_polygon()   #
-            # self.simulator_.add_obstacle(block1)                             #
-            # self.obstacles_.append(block1)                                   #
-            ####################################################################
-
-
-            block1 = [Vector2(-radius/2, -radius*4) , Vector2(-radius/2, radius*4) ,Vector2(radius/2, radius*4), Vector2(radius/2, -radius*4)  ]
-            block1.reverse()
-            self.simulator_.add_obstacle(block1)                             #
-            self.obstacles_.append(block1)                                   #
-
-            self.simulator_.process_obstacles()
-
-        else:
-
-            # 这里全是阻挡.
-            self.simulator_.add_agent(Vector2(0,0))
-            self.goals_.append(Vector2(0,0))
-            if ss:
-                self.simulator_.agents_[idx].static_ = True
-
-            self.simulator_.add_agent(Vector2(0,radius*2))  #
-            self.goals_.append(Vector2(0,radius*2))         #
-            idx +=1                                         #
-            if ss:                                          #
-                self.simulator_.agents_[idx].static_ = True #
-                                                            #
-            self.simulator_.add_agent(Vector2(0,-radius*2)) #
-            self.goals_.append(Vector2(0,-radius*2))        #
-            idx +=1                                         #
-            if ss:                                          #
-                self.simulator_.agents_[idx].static_ = True #
-
-            self.simulator_.add_agent(Vector2(0,radius*4))  #
-            self.goals_.append(Vector2(0,radius*4))        #
-            idx +=1                                         #
-            if ss:                                          #
-                self.simulator_.agents_[idx].static_ = True #
-                                                            #
-            self.simulator_.add_agent(Vector2(0,-radius*4)) #
-            self.goals_.append(Vector2(0,-radius*4))        #
-            idx +=1                                         #
-            if ss:                                          #
-                self.simulator_.agents_[idx].static_ = True #
-
-
-
-        # 目标点标识.
-        #####################################################
-        # self.simulator_.add_agent(Vector2(100,50))        #
-        # self.goals_.append(Vector2(100,50))               #
-        # idx += 1                                          #
-        # if ss:                                          # #
-        #     self.simulator_.agents_[idx].static_ = True # #
-        #                                                   #
-        # self.simulator_.add_agent(Vector2(-50,-50))       #
-        # self.goals_.append(Vector2(-50,-50))              #
-        # idx += 1                                          #
-        # if ss:                                          # #
-        #     self.simulator_.agents_[idx].static_ = True # #
-        #####################################################
-
-        # 只是用来展示的目标点，没有碰撞
-        #self.shows_.append(Vector2(100,50))
-        #self.shows_.append(Vector2(-50,-50))
-        #self.shows_.append(Vector2(-20,-20))
-
-
-        self.simulator_.add_agent(Vector2(-50,0))
-        self.goals_.append(Vector2(100,50))
-
-        ############################################
-        # self.simulator_.add_agent(Vector2(50,0)) #
-        # self.goals_.append(Vector2(-50,-50))     #
-        ############################################
-
-        ##########################################################
-        # block1 = CircleBlock(Vector2(0,0),radius).to_polygon() #
-        # #print(block1)                                         #
-        # self.simulator_.add_obstacle(block1)                   #
-        # self.obstacles_.append(block1)                         #
-        ##########################################################
-
 
     # 逆时针旋转角度。
     def changeAngle(self, position, goal, tha1):
@@ -436,10 +300,13 @@ class Circle:
             return
 
         goalPlan = random.randint(1,200)
-        if goalPlan<100:
+        if goalPlan<150:
             goalPlan = 1
         else:
             goalPlan = 2
+
+        #goalPlan = 3
+
         # Render the current position of all the agents.
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
@@ -451,13 +318,13 @@ class Circle:
             color = [0, 0, 0]
             if not agent1.static_:
                 color[i % 3] = 1
-            circle = viewer.draw_circle(radius=self.simulator_.default_agent_.radius_, color=color)
+            circle = viewer.draw_circle(radius=agent1.radius_, color=color)
             circle.add_attr(rendering.Transform(translation=(position.x, position.y)))
             nearGoal = abs(goal- position)
-            radius = self.simulator_.default_agent_.radius_
+            radius = agent1.radius_
             movepos = abs(position - pre_position)
             print(i, "velocity", velocity, "abs velocity", abs(velocity),
-                  "movedis", movepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static)
+                  "movedis", movepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static, "radius", agent1.radius_)
 
 
             randomGoal = False
@@ -470,12 +337,15 @@ class Circle:
                 print(i, "distance random")
                 #exit()
             else:
-                randomGoal = False
+                if random.randint(0,100) < 1 and agent1.randomGoalTick_<=0:
+                    randomGoal = False
+                else:
+                    randomGoal = False
 
             #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                agent1.randomGoalTick_ =240
+                agent1.randomGoalTick_ =500
                 # 选一个偏移方向. 45-135  225- 315
                 #
 
@@ -555,7 +425,7 @@ class Circle:
                     print("try random")
                     randomTha1 = 0
                     span = 30
-                    rspan = 90
+                    rspan = 120
                     if agent1.keepDirTick_> 0:
                         agent1.keepDirTick_-=1
                         if agent1.keepDir_==0:
@@ -585,8 +455,11 @@ class Circle:
                     ##############################################################################
                     # 根据目标点位置，随机偏移一定的角度。
 
+                if goalPlan ==3 :
+                    agent1.randomGoal_ = goal
+
             if agent1.randomGoalTick_>0:
-                circle = viewer.draw_circle(radius=self.simulator_.default_agent_.radius_/2, color=color)
+                circle = viewer.draw_circle(radius=radius/2, color=color)
                 circle.add_attr(rendering.Transform(translation=(agent1.randomGoal_.x, agent1.randomGoal_.y)))
 
 
@@ -602,14 +475,15 @@ class Circle:
         for goal in self.goals_:
             color = [0, 0, 0]
             color[i % 3] = 1
+            agent = self.simulator_.agents_[i]
             if self.simulator_.agents_[i].static_:
                 i+=1
                 continue
-            circle = viewer.draw_circle(radius=self.simulator_.default_agent_.radius_, color=color)
+            circle = viewer.draw_circle(radius=agent.radius_, color=color)
             circle.add_attr(rendering.Transform(translation=(goal.x, goal.y)))
             i+=1
 
-            # 展示目标点.
+        # 展示目标点.
         #for show in self.shows_:
         #    circle = viewer.draw_circle(radius=self.simulator_.default_agent_.radius_, color=[1,1,0])
         #    circle.add_attr(rendering.Transform(translation=(show.x, show.y)))

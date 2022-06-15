@@ -1,3 +1,4 @@
+import random
 import rvo.math as rvo_math
 
 from .kdtree import KdTree
@@ -21,7 +22,7 @@ class Simulator:
         self.global_time_ = 0.0
         self.time_step_ = 0.1
 
-    def add_agent(self, position):
+    def add_agent(self, position, radius=None):
         """
         Adds a new agent with default properties to the simulation.
 
@@ -38,9 +39,14 @@ class Simulator:
         agent.id_ = len(self.agents_)
         agent.max_neighbors_ = self.default_agent_.max_neighbors_
         agent.max_speed_ = self.default_agent_.max_speed_
-        agent.neighbor_dist_ = self.default_agent_.neighbor_dist_
         agent.position_ = position
-        agent.radius_ = self.default_agent_.radius_
+        if radius==None:
+            agent.radius_ = random.randint(int(self.default_agent_.radius_), int( self.default_agent_.radius_max_))
+        else:
+            agent.radius_ = radius
+
+        agent.neighbor_dist_ =  self.default_agent_.neighbor_dist_ * agent.radius_
+
         agent.time_horizon_ = self.default_agent_.time_horizon_
         agent.time_horizon_obst_ = self.default_agent_.time_horizon_obst_
         agent.velocity_ = self.default_agent_.velocity_
@@ -149,7 +155,8 @@ class Simulator:
         """
         self.kd_tree_.build_obstacle_tree()
 
-    def set_agent_defaults(self, neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed, velocity):
+    def set_agent_defaults(self, neighborDist, maxNeighbors,
+                           timeHorizon, timeHorizonObst, radius, maxSpeed, velocity, radiusMax):
         """
         Sets the default properties for any new agent that is added.
 
@@ -169,6 +176,7 @@ class Simulator:
         self.default_agent_.max_speed_ = maxSpeed
         self.default_agent_.neighbor_dist_ = neighborDist
         self.default_agent_.radius_ = radius
+        self.default_agent_.radius_max_ = radiusMax
         self.default_agent_.time_horizon_ = timeHorizon
         self.default_agent_.time_horizon_obst_ = timeHorizonObst
         self.default_agent_.velocity_ = velocity
