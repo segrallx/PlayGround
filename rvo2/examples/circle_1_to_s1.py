@@ -5,6 +5,7 @@ import math
 import gym.envs.classic_control.rendering as rendering
 import random
 import rvo.math as rvo_math
+import time
 
 from rvo.vector import Vector2
 from rvo.simulator import Simulator
@@ -67,7 +68,6 @@ class BlockFinder(astar.AStar):
 
 
 class Circle:
-
     def __init__(self):
         # Store the goals of the agents.
         self.blockFinder_ = BlockFinder({})
@@ -130,11 +130,10 @@ class Circle:
     # 随机点，有随机的停止点.
     def setup_scenario(self):
         # Specify the global time step of the simulation.
-        self.simulator_.set_time_step(0.5)
         # Specify the default parameters for agents that are subsequently added.
         radius = self.infradius_
         radius_max = self.infradius_max_
-        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 1, Vector2(18.0, 8.0), radius_max)
+        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 10, Vector2(18.0, 8.0), radius_max)
         width = 225
 
         size = int(width/(radius*4))
@@ -578,10 +577,11 @@ def main():
 
     # Set up the scenario.
     circle.setup_scenario()
+    circle.simulator_.set_time_step(10)
 
     # Perform (and manipulate) the simulation.
     while not circle.reached_goal():
-        print("-----")
+        print("-----",time.ctime())
         if RVO_RENDER:
             if viewer is None:
                 viewer = rendering.Viewer(750, 750)
@@ -590,6 +590,7 @@ def main():
         circle.update_visualization(viewer)
         circle.set_preferred_velocities()
         circle.simulator_.step()
+        time.sleep(1)
 
 
 if __name__ == '__main__':
