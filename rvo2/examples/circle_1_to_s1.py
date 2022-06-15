@@ -154,7 +154,7 @@ class Circle:
         for j in range(-size, size):                            #
             #continue
             x1 = -0                                       #
-            if random.randint(0,100)<80:
+            if random.randint(0,100)<70:
                 idx = self.simulator_.add_agent( self.keyToPos((x1, j)))
                 self.goals_.append(self.keyToPos((x1, j)))
                 self.simulator_.agents_[idx].static_= True
@@ -223,8 +223,8 @@ class Circle:
             x2 = 2 * xSize                                       #
 
             #x = 5
-            #if random.randint(0,1) == 0:
-            if j %1 == 0:
+            if random.randint(0,0) == 0:
+            #if j %1 == 0:
                 self.simulator_.add_agent(self.keyToPos((x1,x+j)) )  #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
             else:
@@ -433,6 +433,7 @@ class Circle:
         if not RVO_RENDER:
             return
 
+        goalPlan = random.randint(1,2)
         # Render the current position of all the agents.
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
@@ -452,7 +453,7 @@ class Circle:
             print(i, "velocity", velocity, "abs velocity", abs(velocity),
                   "movedis", movepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static)
 
-            goalPlan = random.randint(1,2)
+
             randomGoal = False
             if agent1.static_:
                 randomGoal = False
@@ -544,6 +545,7 @@ class Circle:
 
                 # 随机找点.
                 if goalPlan ==2:
+                    agent1.randomGoalTick_ *=0.5
                     print("try random")
                     randomTha1 = 0
                     span = 30

@@ -84,7 +84,7 @@ class AStar:
         openSet = []
         heappush(openSet, startNode)
         i =0
-        nn = 20
+        nn = 30
 
         while openSet:
             i+=1
