@@ -133,7 +133,7 @@ class Circle:
         # Specify the default parameters for agents that are subsequently added.
         radius = self.infradius_
         radius_max = self.infradius_max_
-        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 4, Vector2(18.0, 8.0), radius_max)
+        self.simulator_.set_agent_defaults(3, 6, 10, 10,  10, 3.5, Vector2(18.0, 8.0), radius_max)
         width = 225
 
         size = int(width/(radius*4))
@@ -169,8 +169,8 @@ class Circle:
             #continue
             x1 = -0                                       #
             if random.randint(0,100)<70:
-                if j%2==0:
-                    continue
+                #if j%2==0:
+                 #   continue
                 idx = self.simulator_.add_agent( self.keyToPos((x1, j)))
                 self.goals_.append(self.keyToPos((x1, j)))
                 self.simulator_.agents_[idx].static_= True
@@ -595,7 +595,7 @@ def main():
         circle.update_visualization(viewer)
         circle.set_preferred_velocities()
         circle.simulator_.step()
-        time.sleep(1)
+        time.sleep(0.3)
 
 
 if __name__ == '__main__':
