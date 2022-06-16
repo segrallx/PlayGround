@@ -13,7 +13,7 @@ from rvo.simulator import Simulator
 import astar
 
 RVO_RENDER = True
-
+opt_speed = 3
 
 class CircleBlock:
     def __init__(self, pos, radius):
@@ -133,7 +133,7 @@ class Circle:
         # Specify the default parameters for agents that are subsequently added.
         radius = self.infradius_
         radius_max = self.infradius_max_
-        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 10, Vector2(18.0, 8.0), radius_max)
+        self.simulator_.set_agent_defaults(3, 6, 0.01, 0.1,  10, 4, Vector2(18.0, 8.0), radius_max)
         width = 225
 
         size = int(width/(radius*4))
@@ -144,7 +144,6 @@ class Circle:
         '''
 
         # 弧形阻挡
-
         '''
         goal1 = self.changeAngle(Vector2(-100),  Vector2(0,0), 0) #
         idx = self.simulator_.add_agent(goal1) #                      #
@@ -169,9 +168,9 @@ class Circle:
         for j in range(-size, size):                            #
             #continue
             x1 = -0                                       #
-            if random.randint(0,100)<60:
-                #if j%2==0:
-                #    continue
+            if random.randint(0,100)<70:
+                if j%2==0:
+                    continue
                 idx = self.simulator_.add_agent( self.keyToPos((x1, j)))
                 self.goals_.append(self.keyToPos((x1, j)))
                 self.simulator_.agents_[idx].static_= True
@@ -191,6 +190,7 @@ class Circle:
             ################
             #xx = -1
             #yy = 3
+
             if xx==0:                                                               # #
                 idx = self.simulator_.add_agent( self.keyToPos((x1-1, j)) )  # #
                 self.goals_.append(self.keyToPos((x1-1, j)))        #     # #
@@ -237,11 +237,11 @@ class Circle:
         x =0
         c =0
         x = random.randint(-size, size)
-        xSize=5
+        xSize=3
 
         for j in range( -int(size), int(size)):                             #
             c+=1
-            if c>14:
+            if c>24:
                 continue
             if j%2==0:
                 continue
@@ -250,24 +250,22 @@ class Circle:
             x2 = 2 * xSize                                       #
 
 
-
-
             #x = 5
+            '''
+
             if random.randint(0,2) == 3:
                 self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
             else:
                 self.simulator_.add_agent(self.keyToPos((x1,x+j)),10)  #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
-            #if j %2 == 0:
-
-            #################################################################
-            #     self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #     #
-            #     self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       # #
-            # else:                                                         #
-            #     self.simulator_.add_agent(self.keyToPos((-x1,x+j)) ,10)   #
-            #     self.goals_.append(self.keyToPos( (-x2, -(x+j)) ))        #
-            #################################################################
+            '''
+            if j %2 == 0:
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #     #
+                self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       # #
+            else:                                                         #
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)) ,10)   #
+                self.goals_.append(self.keyToPos( (x2, -(x+j)) ))        #
 
             #break
 
@@ -307,11 +305,15 @@ class Circle:
         #goalPlan = 3
 
         # Render the current position of all the agents.
-        for i in range(self.simulator_.num_agents):
+        size = self.simulator_.num_agents
+        print("num_agents", size)
+        for i in range(size):
+            #print(i)
             goal = self.goals_[i]
             agent1 = self.simulator_.agents_[i]
             position = self.simulator_.agents_[i].position_
             pre_position = self.simulator_.agents_[i].pre_position_
+            x_position = self.simulator_.agents_[i].x_position_
             velocity = self.simulator_.agents_[i].velocity_
             static = self.simulator_.agents_[i].static_
             color = [0, 0, 0]
@@ -322,8 +324,9 @@ class Circle:
             nearGoal = abs(goal- position)
             radius = agent1.radius_
             movepos = abs(position - pre_position)
+            xmovepos = abs(position - x_position)
             print(i, "velocity", velocity, "abs velocity", abs(velocity),
-                  "movedis", movepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static, "radius", agent1.radius_)
+                  "movedis", movepos, "xmovepos", xmovepos, "position", position, "goal", goal, "randgoal", agent1.randomGoal_, "static", static, "radius", agent1.radius_)
 
 
             randomGoal = False
@@ -344,7 +347,7 @@ class Circle:
             #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                agent1.randomGoalTick_ =500
+                agent1.randomGoalTick_ =10
                 # 选一个偏移方向. 45-135  225- 315
                 #
 
@@ -405,7 +408,7 @@ class Circle:
                             agent1.randomGoalList_ =ll[1:]
                             print("astar find",  goldTuple,agent1.randomGoal_ , ll)
                             goalPlan=1
-                            break
+                            #continue
                                     #exit()
                         else:
                             print("astar start is static", start)
@@ -498,7 +501,7 @@ class Circle:
         for i in range(self.simulator_.num_agents):
             goal = self.goals_[i]
             agent = self.simulator_.agents_[i]
-            xxy = 150
+            xxy = 5
 
 
             if self.count_ %xxy ==0:
@@ -575,9 +578,11 @@ def main():
     print(goal1)
     #exit()
 
+    #fps = 15
     # Set up the scenario.
     circle.setup_scenario()
-    circle.simulator_.set_time_step(10)
+    step = 0.1
+    circle.simulator_.set_time_step(4)
 
     # Perform (and manipulate) the simulation.
     while not circle.reached_goal():

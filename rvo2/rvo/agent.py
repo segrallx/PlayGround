@@ -16,6 +16,7 @@ class Agent:
         self.obstacle_neighbors_ = [] # (float, Obstacle)
         self.orca_lines_ = [] # Line
         self.static_ = [] # Line
+        self.x_position_ = Vector2()
         self.position_ = Vector2()
         self.pre_position_ = Vector2()
         self.check_preposition_ = False
@@ -308,6 +309,7 @@ class Agent:
             else:
                 # Collision. Project on cut-off circle of time timeStep.
                 invTimeStep = 1.0 / self.simulator_.time_step_
+                #invTimeStep = 1
 
                 # Vector from cutoff center to relative velocity.
                 w = relativeVelocity - invTimeStep * relativePosition
@@ -384,6 +386,7 @@ class Agent:
         Updates the two-dimensional position and two-dimensional velocity of this agent.
         """
         self.velocity_ = self.new_velocity_
+        self.x_position_ = self.position_
         self.position_ += self.velocity_ * self.simulator_.time_step_
 
     def linear_program1(self, lines, lineNo, radius, optVelocity, directionOpt):

@@ -40,13 +40,13 @@ class Simulator:
         agent.max_neighbors_ = self.default_agent_.max_neighbors_
         agent.max_speed_ = self.default_agent_.max_speed_
         agent.position_ = position
+
         if radius==None:
             agent.radius_ = random.randint(int(self.default_agent_.radius_), int( self.default_agent_.radius_max_))
         else:
             agent.radius_ = radius
 
         agent.neighbor_dist_ =  self.default_agent_.neighbor_dist_ * agent.radius_
-
         agent.time_horizon_ = self.default_agent_.time_horizon_
         agent.time_horizon_obst_ = self.default_agent_.time_horizon_obst_
         agent.velocity_ = self.default_agent_.velocity_
