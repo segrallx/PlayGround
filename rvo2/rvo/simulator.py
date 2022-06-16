@@ -38,7 +38,7 @@ class Simulator:
         agent = Agent(self)
         agent.id_ = len(self.agents_)
         agent.max_neighbors_ = self.default_agent_.max_neighbors_
-        agent.max_speed_ = self.default_agent_.max_speed_
+        #agent.max_speed_ = self.default_agent_.max_speed_
         agent.position_ = position
 
         if radius==None:
@@ -46,9 +46,12 @@ class Simulator:
         else:
             agent.radius_ = radius
 
+        agent.max_speed_ = agent.radius_ *0.3
         agent.neighbor_dist_ =  self.default_agent_.neighbor_dist_ * agent.radius_
-        agent.time_horizon_ = self.default_agent_.time_horizon_
-        agent.time_horizon_obst_ = self.default_agent_.time_horizon_obst_
+        #agent.time_horizon_ = self.default_agent_.time_horizon_
+        #agent.time_horizon_obst_ = self.default_agent_.time_horizon_obst_
+        agent.time_horizon_ = 1*agent.radius_
+        agent.time_horizon_obst_ = 1*agent.radius_
         agent.velocity_ = self.default_agent_.velocity_
         self.agents_.append(agent)
 

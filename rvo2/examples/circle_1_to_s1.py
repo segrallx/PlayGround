@@ -76,8 +76,8 @@ class Circle:
         self.obstacles_ = [] # Vector2
         self.shows_ = [] # Vector2
         self.count_ = 0
-        self.infradius_ = 10
-        self.infradius_max_ = 13
+        self.infradius_ = 8
+        self.infradius_max_ = 12
         self.gridSize_ = 20
         self.width_ = int(225/self.gridSize_)
         self.height_ = int(225/self.gridSize_)
@@ -239,10 +239,13 @@ class Circle:
         x = random.randint(-size, size)
         xSize=3
 
+
         for j in range( -int(size), int(size)):                             #
             c+=1
             if c>24:
                 continue
+            #if random.randint(0,1)==0:
+            #    continue
             if j%2==0:
                 continue
 
@@ -260,11 +263,11 @@ class Circle:
                 self.simulator_.add_agent(self.keyToPos((x1,x+j)),10)  #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       #
             '''
-            if j %2 == 0:
-                self.simulator_.add_agent(self.keyToPos((x1,x+j)))  #     #
+            if random.randint(0,1) == 0:
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)),10)  #     #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))       # #
             else:                                                         #
-                self.simulator_.add_agent(self.keyToPos((x1,x+j)) ,10)   #
+                self.simulator_.add_agent(self.keyToPos((x1,x+j)), 10)   #
                 self.goals_.append(self.keyToPos( (x2, -(x+j)) ))        #
 
             #break
@@ -347,7 +350,7 @@ class Circle:
             #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                agent1.randomGoalTick_ =30
+                agent1.randomGoalTick_ =40
                 # 选一个偏移方向. 45-135  225- 315
                 #
 
