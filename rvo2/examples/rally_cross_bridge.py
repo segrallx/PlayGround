@@ -387,7 +387,7 @@ class Circle:
             #randomGoal= False
             #if nearGoal > 2*radius and (abs(velocity) <=0.1 or (agent1.check_preposition_ and movepos<0.7) )  and (not static):
             if randomGoal:
-                agent1.randomGoalTick_ =40
+                agent1.randomGoalTick_ =10
                 # 选一个偏移方向. 45-135  225- 315
                 #
 
